@@ -2,20 +2,18 @@ package me.doudan.doc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import me.doudan.doc.annotation.ControllerLayer;
+import me.doudan.doc.annotation.DataLayer;
+import me.doudan.doc.annotation.ManagementLayer;
+import me.doudan.doc.annotation.ServiceLayer;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
-import java.lang.reflect.Field;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,30 +21,39 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
-@Component
+/**
+ * @author goudan
+ * @date 2025/5/12
+ * @version 1.0
+ */
 public class AnnotationHelper {
     //这个String 存的是注解的集合的那个描述
     private final Map<String, List<MethodDetail>> MethodDetails = new LinkedHashMap<>();
     private final Map<String, Map<String, List<String>>> chartModule = new LinkedHashMap<>();  //处理md格式
 
-    @Value("${doc-helper.md-full-name:false}")  //是否让md文件展示方法全名
-    private boolean mdFullName ;
+ //是否让md文件展示方法全名
+    private boolean mdFullName = false ;
 
-    private List<String> orderList = new  LinkedList();  //把这个主机map的值存进来，弄成有序的
+    private int maxMethodLength = 30;
+
+    private List<String> orderList = new  LinkedList<>();  //把这个主机map的值存进来，弄成有序的
 
     public AnnotationHelper() {
+        Map map = new LinkedHashMap<>();
+        map.put(ControllerLayer.class, "ControllerLayer");
+        map.put(ManagementLayer.class, "ManagementLayer");
+        map.put(ServiceLayer.class, "ServiceLayer");
+        map.put(DataLayer.class, "DataLayer");
+        this.annotationTypeMap = map;
     }
 
-    @Autowired
     public AnnotationHelper(Map<Class<?>, String> methodAnnotation) {
         this.annotationTypeMap = methodAnnotation;
     }
 
-    //    @Resource
-    Map<Class<?>, String> annotationTypeMap;  //这个map现在是有序的了
+    private final  Map<Class<?>, String>  annotationTypeMap;  //这个map现在是有序的了
 
-    private Map<String, List<MethodDetail>> scanMethodDetails(String basePackage) throws IOException {
+    private void scanMethodDetails(String basePackage) throws IOException {
 
         for(Map.Entry<Class<?>, String> entry : annotationTypeMap.entrySet()){
             String value = entry.getValue();
@@ -107,7 +114,7 @@ public class AnnotationHelper {
                     List<String> descList = innerMap.computeIfAbsent(annotationName, k -> new ArrayList<>());
 
                     String chatMethodName = methodSignature;
-                    if(mdFullName){
+                    if(!mdFullName){
                         //如果不展示全名的话就是使用简名
 //                        String[] arr = chatMethodName.split("\\.");
 //                        chatMethodName = arr[arr.length - 1];
@@ -122,9 +129,6 @@ public class AnnotationHelper {
             }
         }
         String jsonChatModule = new ObjectMapper().writeValueAsString(chartModule);
-        System.out.println("md-模型最初结果" + jsonChatModule);
-//        writeMethodDetailsToJson(filePath);
-        return MethodDetails;
     }
 
     /**
@@ -133,32 +137,29 @@ public class AnnotationHelper {
      * @param packName
      * @throws IOException
      */
-    public void scan(@NonNull String packName) throws IOException {
+    public void scan(String packName) throws IOException {
         scanMethodDetails(packName);
     }
 
-    public void writeModuleMd(@Nullable String fileName) {
+    public void writeModuleMd(String fileName) {
         StringBuilder sb  = new StringBuilder();
         String content = handleChartModule();
         String details = handleMethodDetails();
         String filePath = "method.md";
-        if (fileName != null) {
-            filePath = fileName ;
-        }
         try {
-            Path path = Paths.get(filePath);
-            Files.writeString(path, content);
-            System.out.println("功能表格已完成：" + path.toAbsolutePath());
+//            Path path = Paths.get(filePath);
+//            Files.writeString(path, content);
+//            System.out.println("功能表格已完成：" + path.toAbsolutePath());
 
-            Path pathDetail = Paths.get("detail-"+filePath);
-            Files.writeString(pathDetail,details);
-            System.out.println("方法详细表：" + path.toAbsolutePath());
+//            Path pathDetail = Paths.get("detail-"+filePath);
+//            Files.writeString(pathDetail,details);
+//            System.out.println("方法详细表：" + pathDetail.toAbsolutePath());
 
             sb.append(content).append("\n").append(details);
 
-            Path pathAll = Paths.get("all-"+filePath);
+            Path pathAll = Paths.get(fileName);
             Files.writeString(pathAll,sb.toString());
-            System.out.println("打印在一张表：" + pathAll.toAbsolutePath());
+            System.out.println("file outPath：" + pathAll.toAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -188,19 +189,10 @@ public class AnnotationHelper {
 
             sb.append("|").append(module).append("|");  //这里加入了模块，准备只处理数组
 
-//            for(Map.Entry<Class<?>,String> entry1 : annotationTypeMap.entrySet()){
-//                String value = entry1.getValue();
-//                for (Map.Entry<String, List<String>> innerEntry : innerMap.entrySet()) {
-//                    //由于表头有序的，但是列表是无序的
-//                    String listString = String.join(",", innerEntry.getValue());   //这里顺序是 乱的
-//                    String md = wrapWithBr(listString,30);
-//                    sb.append(md).append("|");
-//                }
-//            }
             for (Map.Entry<String, List<String>> innerEntry : innerMap.entrySet()) {
                 //由于表头有序的，但是列表是无序的
                 String listString = String.join(",", innerEntry.getValue());   //这里顺序是 乱的
-                String md = wrapWithBr(listString,30);
+                String md = wrapWithBr(listString);
                 sb.append(md).append("|");
             }
 
@@ -237,7 +229,7 @@ public class AnnotationHelper {
             List<MethodDetail> methodDetails = entry.getValue();
             for(MethodDetail methodDetail : methodDetails){
                 sb.append("|");
-                sb.append(methodDetail.getMethod()).append("|");
+                sb.append(methodDetail.getMethod().length() > 30 ? wrapWithBr(methodDetail.getMethod() ): methodDetail.getMethod()).append("|");
                 sb.append(methodDetail.getReturnType()).append("|");
                 sb.append(methodDetail.getParameters()).append("|");
                 sb.append(methodDetail.getDescription()).append("|");
@@ -254,16 +246,15 @@ public class AnnotationHelper {
      * 处理方法太长的话换行
      *
      * @param input
-     * @param maxLineLength
      * @return
      */
-    private String wrapWithBr(String input, int maxLineLength) {
+    private String wrapWithBr(String input) {
         if (input == null) return "";
 
         StringBuilder sb = new StringBuilder();
         int len = input.length();
-        for (int i = 0; i < len; i += maxLineLength) {
-            int end = Math.min(i + maxLineLength, len);
+        for (int i = 0; i < len; i += maxMethodLength) {
+            int end = Math.min(i + maxMethodLength, len);
             sb.append(input, i, end);
             if (end < len) {
                 sb.append("<br>");
