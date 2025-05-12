@@ -1,7 +1,5 @@
 package me.doudan.doc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import me.doudan.doc.annotation.ControllerLayer;
 import me.doudan.doc.annotation.DataLayer;
 import me.doudan.doc.annotation.ManagementLayer;
@@ -10,7 +8,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
-import java.io.File;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -128,7 +126,6 @@ public class AnnotationHelper {
                 methodList.add(methodDetail);
             }
         }
-        String jsonChatModule = new ObjectMapper().writeValueAsString(chartModule);
     }
 
     /**
@@ -264,11 +261,6 @@ public class AnnotationHelper {
     }
 
 
-    private void writeMethodDetailsToJson(String filePath) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.writeValue(new File(filePath), MethodDetails);
-    }
 
     public static class MethodDetail {
         private String method;
