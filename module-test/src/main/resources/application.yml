@@ -1,0 +1,5 @@
+doc-helper:
+  enable: true
+  pack-name: module
+  anto-download-md: true
+  md-full-name: true
