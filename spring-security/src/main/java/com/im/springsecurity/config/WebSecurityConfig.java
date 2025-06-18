@@ -5,6 +5,7 @@ import com.im.springsecurity.handle.HandleSecurityAuthFail;
 import com.im.springsecurity.handle.HandleSecurityAuthSuccess;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -37,6 +38,9 @@ public class WebSecurityConfig {
                 )
 
                 .csrf(csrf -> csrf.disable()) // 禁用 CSRF（前后端分离通常需要禁用）
+                // 5. 跨域支持（CORS，前后端分离必要）
+                .cors(Customizer.withDefaults())
+                //对于异常处理还需要配置
                 .build();
     }
 }

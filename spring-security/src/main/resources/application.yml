@@ -7,3 +7,8 @@ spring:
     user:
       name: root
       password: root
+  datasource:
+    url: jdbc:mysql://localhost:3306/swith_chat
+    username: root
+    password: a132b465
+    driver-class-name: com.mysql.cj.jdbc.Driver

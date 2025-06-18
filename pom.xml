@@ -18,6 +18,8 @@
     <modules>
         <module>doc-method-help</module>
         <module>module-test</module>
+        <module>SUANFA</module>
+        <module>batch-study</module>
     </modules>
 
     <properties>
@@ -25,6 +27,15 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/wei-ze-guang/packs</url>
+        </repository>
+    </distributionManagement>
+
 
     <dependencyManagement>
         <dependencies>
@@ -101,6 +112,12 @@
                 <version>2.10.1</version>
             </dependency>
 
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.15</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -112,6 +129,11 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>3.2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>
