@@ -12,6 +12,7 @@ public class SynchronizedClass {
 
     /**
      * 【】 修饰实例方法
+     * 这个方法里面的代码执行完之后自动释放锁
      */
     public synchronized void methodHasSynchronized() {
         // 同步方法，锁的是当前对象(this)
