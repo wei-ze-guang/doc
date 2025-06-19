@@ -10,6 +10,10 @@ import java.util.concurrent.ExecutionException;
  * 这里是练习多线程的
  */
 
+/**
+ * 并发的三个特性，原子性，顺序性，可见性
+ */
+
 public class Main {
     /**
      * 下面是三种不同方式的启动方式
@@ -152,7 +156,6 @@ public class Main {
         public void run() {
             //因为这个方法在现在的Main实例的内部，现在获取的是现在这个实例的监视器
             testSynchronized();
-
             /**
              * //  这是是某种情况，我们等待，为什么等待，因为我们还没拿到我想要的资源，这个条件就是我们想要的资源
              * 下面!条件成立我们就等待，为什么不使用if而是使用一个无限循环while呢，可以看下面
@@ -163,7 +166,7 @@ public class Main {
              *     }
              *     // 条件可能没满足，出现逻辑错误
              */
-
+            //这里其实写的有问题，因为上面已经还没执行，一般来说上面的同步方法执行完之后这里就不要了，只是为了写
             // 虚假唤醒（Spurious Wakeup）”，虚假唤醒概率是比较小的是指一个正在执行 wait() 或 await() 的线程，在没有收到 notify() 或 signal() 通知、
             // 也没有条件满足的情况下被虚假唤醒了。这里的话如果在调用wait之前，上面的同步方法已经执行完了，所以下面要加一个条件
             while (true) {   // 用循环判断条件，避免“虚假唤醒”和“错过通知”，这个这个条件true不是我们想要的，我们想要的是false，如果不是这个条件线程被虚假唤醒，在wait一次
@@ -174,6 +177,14 @@ public class Main {
                     throw new RuntimeException(e);
                 }
             }
+        }
+    }
+
+    class TestVolatileThread extends Thread {
+        public static volatile boolean flag = false;
+        @Override
+        public void run() {
+            flag = true;
         }
     }
 }
