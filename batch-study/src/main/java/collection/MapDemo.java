@@ -2,10 +2,7 @@ package collection;
 
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * HashMap
@@ -44,7 +41,9 @@ import java.util.Map;
  * | **Hashtable\<K,V>**         | 实现 Map         | 数组 + 链表        | 是    | 所有公共方法均加 `synchronized` 关键字      | 否           | 不允许 `null` 键和值                  |
  * | **ConcurrentHashMap\<K,V>** | 实现 Map         | 数组 + 链表 + 红黑树  | 是    | JDK7 分段锁；JDK8 CAS + synchronized | 否           | 高效线程安全实现，不允许 `null` 键和值         |
  */
-public class MapDemo {
+public class MapDemo implements Comparable<MapDemo> {
+
+
 
     public static void main(String[] args) {
 
@@ -119,7 +118,27 @@ public class MapDemo {
         for(int i = 0 ; i <100 ; i++){
             hashTable.put("key" + i, "value" + i);
         }
+
+        List list = new ArrayList();
+        for(int i = 0 ; i <100 ; i++){
+            list.add(hashTable.get("key" + i));
+        }
+
+        List list2 = new LinkedList(list);
+
+        list2.addAll(list);
+
+        Object[] array = list2.toArray();
+        Object[] array1 = list.toArray();
+
+
+
         Long end = System.currentTimeMillis();
         System.out.println(end - start);
+    }
+
+    @Override
+    public int compareTo(MapDemo o) {
+        return 0;
     }
 }

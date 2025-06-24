@@ -20,6 +20,7 @@ public class DemoCollectionList {
     static final List f = new ArrayList();
     static final Queue e = new LinkedList();   //他也实现了queue接口，当然也实现了List接口
 
+
     static final Set d = new HashSet();  //唯一的，没有重复值，基于哈希表
 
 
