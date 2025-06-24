@@ -1,7 +1,11 @@
 package juc;
 
+import java.util.Comparator;
 import java.util.Random;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 public class PriorityBlockingQueueExample {
 
@@ -9,9 +13,20 @@ public class PriorityBlockingQueueExample {
 
     private static ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
 
+    static PriorityBlockingQueue<String> queue1 = new PriorityBlockingQueue<>(100);
 
-    //
-    static BlockingQueue<String> queue = new PriorityBlockingQueue<>(100);
+    static Comparator comparator = new Comparator<String>() {
+        public int compare(String o1, String o2) {
+            return o1.length() - o2.length();
+        }
+    };
+
+    /**
+     * 必须写在排序接口的后面，因为是静态的，会按照顺序执行，下面两种都是合法的
+     */
+    static PriorityBlockingQueue<String> queue2 = new PriorityBlockingQueue<>(100,comparator);
+
+    static PriorityBlockingQueue<String> queue = new PriorityBlockingQueue<>(100,(o1, o2) -> o1.length() - o2.length());
 
 
     private static final int times = 100;  //循环次数
@@ -28,7 +43,6 @@ public class PriorityBlockingQueueExample {
         for (int i = 0; i < threads; i++) {
             new producerThread().start();
             consumerThread consumerThread = new consumerThread();
-            consumerThread.setPriority(6);  //优先级，最小是5  默认是5  最高10
             consumerThread.start();
         }
 
@@ -79,7 +93,7 @@ public class PriorityBlockingQueueExample {
 
                 String message = null;
                 try {
-                    message = queue.poll(5, TimeUnit.SECONDS);
+                    message = (String) queue.poll(5, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -99,6 +113,10 @@ public class PriorityBlockingQueueExample {
 }
 
 /**
+ * 或者构造函数传入排序接口
+ * 一个基于数组的最小二叉堆（binary heap）实现的优先队列
+ * Comparator<Task> reverseComparator = (t1, t2) -> Integer.compare(t2.priority, t1.priority);
+ * PriorityBlockingQueue<Task> queue = new PriorityBlockingQueue<>(11, reverseComparator);
  * | 特性          | 描述                                             |
  * | ----------- | ---------------------------------------------- |
  * | **基于优先级排序** | 元素按优先级排序，非 FIFO（默认按自然顺序，或自定义 Comparator）       |

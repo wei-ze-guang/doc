@@ -55,8 +55,6 @@ public class VarHandlerDemo {
 
 
 
-
-
         VarHandle vh = null;
     }
 }
