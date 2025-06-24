@@ -9,6 +9,7 @@ public class AbstractFactoryPattern {
 
     public static void main(String[] args) {
         GUIFactory factory = new MacFactory();
+
         Button btn = factory.createButton();
         Checkbox chk = factory.createCheckbox();
 

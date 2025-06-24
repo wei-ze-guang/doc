@@ -12,3 +12,8 @@
 | ✅ 工厂方法 | 每个产品对应一个工厂          | ★★☆ | `CircleFactory implements ShapeFactory`         |
 | ✅ 抽象工厂 | 多系列产品统一生产           | ★★★ | `UIFactory -> createButton(), createCheckbox()` |
 ---  
+### 总结
+- 简单工厂  生产多种
+  - 一个工厂身上不同类型
+- 工厂方法 
+  - 多个工厂，每个工厂生产一种
