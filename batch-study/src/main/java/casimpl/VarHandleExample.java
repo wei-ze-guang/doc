@@ -23,11 +23,13 @@ public class VarHandleExample {
         boolean success = ((Integer) oldValue == expect);  // 表示 CAS 是否成功
         System.out.println("返回的结果是:"+oldValue+"状态成功与否:"+success);
     }
-    public VarHandleExample(){
-        System.out.println("构造方法被执行");
+
+    static class AddThread extends Thread{
+        @Override
+        public void run() {
+
+        }
     }
-
-
 
     /**
      * 静态代码块在 类加载过程中的“初始化阶段”执行
