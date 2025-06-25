@@ -65,10 +65,25 @@ public class ConstantPoolExample {
 | `StringBuilder("a").append("b")` | ❌ 否     | ❌ 否     | 需要              |  
 ---  
 **量池的内容不是“你写在源码里它就进去了”，而是“你运行时第一次用它，它才进去”。**  
+## intern()方法  
+- 使用intern()后**无论如何返回的都是常量池的引用,这一点非常重要**,但是会出现下面的情况  
+  - 如果常量池原先没有这个字符出运行时常量池，如下面
 ```java
-        String s1 = new StringBuilder("计算").append("机").toString();
-        String s2 = s1.intern(); // 常量池中原来没有 "计算机"
+        String s1 = new StringBuilder("计算").append("机").toString();  //这个不是编译常量
+        String s2 = s1.intern(); // 常量池中原来没有 "计算机" ，返回的是S1的地址，这时候常量池"计算机的引用就指向"S1
         String s3 = "计算机";     // 之后才加载字面量,他确实在类的常量池里面，但是是第一次使用的时候才会加载进去
         System.out.println(s1 == s2); // true！（s1 的引用放进了常量池）
+        System.out.println(s2 == s3); // true  
+```  
+  - 如果常量池原来已经有了这个字符串的常量池引用  
+```java
+        String s = "计算机";
+        String s1 = new StringBuilder("计算").append("机").toString();
+        String s2 = s1.intern(); // 常量池中原来没有 "计算机"
+        String s3 = "计算机";     // 之后才加载字面量
+        System.out.println(s1 == s2); // true！（s1 的引用放进了常量池）
         System.out.println(s2 == s3); // true
-```
+        System.out.println(s2 == s  && s2 == s3); //false
+
+```  
+

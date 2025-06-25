@@ -29,12 +29,18 @@ public class StringDemo {
         /**
          * 下面是常量池中原先没有的
          */
+        String s = "计算机";
         String s1 = new StringBuilder("计算").append("机").toString();
         String s2 = s1.intern(); // 常量池中原来没有 "计算机"
         String s3 = "计算机";     // 之后才加载字面量
         System.out.println(s1 == s2); // true！（s1 的引用放进了常量池）
         System.out.println(s2 == s3); // true
+        System.out.println(s2 == s  && s2 == s3); //false
 
     }
+
+    /**
+     *
+     */
 
 }
