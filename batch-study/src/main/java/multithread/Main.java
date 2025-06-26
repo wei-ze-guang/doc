@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 /**
  * 这里是练习多线程的
@@ -42,18 +43,20 @@ public class Main {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         for (int i = 0; i < 10; i++) {
-//        new OneThread().start();‘
-//        new  Thread(new RunnableImpl()).start();
+        new OneThread().start();
+        new  Thread(new RunnableImpl()).start();
 
-//        FutureTask[] array = new FutureTask[10];
-//        for (int j = 0; j < 10; j++) {
-//            array[j] = new FutureTask(new CallableImpl());
-//            array[j].run();
-//            Integer result = (Integer) array[j].get();
-//        }
-//        for (int j = 0; j < 10; j++) {
-//            System.out.println("线程返回值是:"+array[j].get());
-//        }
+        FutureTask[] array = new FutureTask[10];
+
+        for (int j = 0; j < 10; j++) {
+            array[j] = new FutureTask(new CallableImpl());
+            array[j].run();
+            Integer result = (Integer) array[j].get();
+        }
+
+        for (int j = 0; j < 10; j++) {
+            System.out.println("线程返回值是:"+array[j].get());
+        }
 
         }
     }
@@ -68,7 +71,6 @@ public class Main {
         for (i = 0; i < length; i++) {
             new OneThread().start();
         }
-
 
         try {
             //这个sleep  谁调用谁睡眠，看清楚是谁调用，不是当前线程,锁不释放

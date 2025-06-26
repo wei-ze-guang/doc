@@ -43,6 +43,28 @@ public class Main {
         System.out.println(String.class.isInstance(s));
     }
 
+    /**
+     * 判断是不是数组
+     */
+    @Test
+    public void useIsArray(){
+        int[] t = new int[]{1,2,1};
+        System.out.println(t.getClass() == int[].class);  //true
+        System.out.println(t.getClass().isArray());  //true
+    }
+
+    /**
+     * clone方法是Object方法，想要实现必须实现Cloneable就恶口，并重写clone
+     * clone是浅拷贝
+     */
+    public void cloneT(){
+
+        String t = new String("555");
+        int[] a = new int[]{1,2,1};
+
+        int[] clone = a.clone();
+    }
+
 
 }
 

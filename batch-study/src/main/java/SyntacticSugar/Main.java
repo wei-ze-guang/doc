@@ -3,6 +3,9 @@ package SyntacticSugar;
 
 import java.util.Arrays;
 
+/**
+ * 这个包下面练习语法糖
+ */
 public class Main {
     public static void main(String[] args) {
 

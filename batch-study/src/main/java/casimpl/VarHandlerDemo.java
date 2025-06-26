@@ -41,10 +41,16 @@ public class VarHandlerDemo {
 
         int a = (int) numHandle.get(varHandleExample);
 
+        /**
+         * 这个会返回旧值
+         */
         numHandle.compareAndExchange(varHandleExample,a,888);
 
         System.out.println(a);
 
+        /**
+         * 这个不会返回旧值
+         */
         handle.compareAndSet(varHandleExample,value+"2","newValue");
 
         String newValue = (String) handle.get(varHandleExample);
@@ -52,7 +58,6 @@ public class VarHandlerDemo {
         System.out.println("旧值:"+value);
 
         System.out.println("新值:"+newValue);
-
 
 
         VarHandle vh = null;
