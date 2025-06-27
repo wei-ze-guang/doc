@@ -122,6 +122,36 @@ public interface Future<V> {
         this.callable = Executors.callable(runnable, result);
         this.state = NEW;       // ensure visibility of callable
     }
+```  
+#### 怎么把一个一个runable没有结果的线程封装为有结果的呢 
+ - 使用的书Executors.callAble()方法  
+```java
+Executors.callable(Runnable task, T result)
+```
+```java
+public static <T> Callable<T> callable(Runnable task, T result) {
+    if (task == null)
+        throw new NullPointerException();
+    return new RunnableAdapter<T>(task, result);
+}
+
+```
+```java
+static final class RunnableAdapter<T> implements Callable<T> {
+    final Runnable task;
+    final T result;
+
+    RunnableAdapter(Runnable task, T result) {
+        this.task = task;
+        this.result = result;
+    }
+
+    public T call() {
+        task.run();     // 执行原来的 Runnable
+        return result;  // 返回指定的 result 值
+    }
+}
+
 ```
  - 构造方法一演示代码  
 ```java
@@ -267,7 +297,7 @@ public boolean isCancelled() {
     }
 ```  
 ---  
-- boolean isDone()方法，这个方法就是看一下有没有完成 
+### boolean isDone()方法，这个方法就是看一下有没有完成 
   - 什么情况下没完成呢，就是你还没开始，肯定没完成，那还在运行，那你还没完成，返回false  
   - 什么情况下完成了呢，他被别人取消了，并且取消成功了，还有就是线程已经运行完毕了，就是完成了  
     - 什么是运行完毕呢？我不管线程是爆粗了，挂壁了还是什么，还有就是已经顺利执行完了，结果返回了，就是运行完毕  
@@ -302,7 +332,7 @@ public boolean isCancelled() {
     }
 ```  
 ---  
-- public V get(long timeout, TimeUnit unit) 有参方法
+### public V get(long timeout, TimeUnit unit) 有参方法
  - 他跟上面的 public V get() 方法有什么区别呢，就是说我我在等你线程给我结果，我就等你这个长时间
    - 如果你在这个时间内返回结果给我，我就要你的结果  
    - 如果这个时间内你没结果，你给我抛出一个 throw new TimeoutException(); 异常，我看到这个异常我知道你在期限内没给我结果，然后我自己处理  
@@ -319,7 +349,19 @@ public boolean isCancelled() {
     return report(s);
 }
 ```  
-#### 方法测试案例，不是很全，但是用了比较多了,先测试get() 不设置参数，就是无限期等等结果
+#### 方法测试案例，不是很全，但是用了比较多了,先测试get() 不设置参数，就是无限期等等结果  
+**注意** 这个方法是可以执行多次的，他会缓存结果，异常也会缓存  
+```java
+FutureTask<Integer> future = new FutureTask<>(() -> 42);
+new Thread(future).start();
+
+// 第一次get，等待任务完成，返回42
+System.out.println(future.get());
+
+// 第二次get，直接返回缓存的42
+System.out.println(future.get());
+
+```
 ```java
    static void testFutureTask(){
         /**

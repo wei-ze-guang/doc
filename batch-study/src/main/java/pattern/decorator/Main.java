@@ -8,6 +8,7 @@ public class Main {
 
         //压缩一下
         DataSource compressDecorator = new CompressDecorator(source);
+
         System.out.println(compressDecorator.write("压缩后的数据"));
 
         // 加密一下

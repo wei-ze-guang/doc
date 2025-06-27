@@ -1,6 +1,7 @@
 package pattern.decorator;
 
 public class FileDataSource implements DataSource {
+
     private String data;
 
     @Override

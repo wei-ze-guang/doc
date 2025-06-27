@@ -1,6 +1,7 @@
 package pattern.decorator;
 
 public class EncryptDecorator extends DataSourceDecorator{
+
     public EncryptDecorator(DataSource source) {
         super(source);
     }

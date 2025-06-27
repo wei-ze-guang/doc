@@ -3,8 +3,10 @@ package pattern.adapter;
 public class AdapterPatternDemo {
     public static void main(String[] args) {
         System.out.println("== 使用 LegacyLogger 的适配器 ==");
+
         NewLogger legacyAdapter = new LegacyToNewAdapter(new LegacyLoggerImpl());
         legacyAdapter.info("系统启动成功");
+
         legacyAdapter.error("无法连接数据库");
 
         System.out.println("\n== 使用原生 SLF4J ==");
