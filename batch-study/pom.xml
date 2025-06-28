@@ -23,7 +23,14 @@
             <artifactId>junit</artifactId>
         </dependency>
 
-<!--        查看对象头信息-->
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+
+
+        <!--        查看对象头信息-->
         <dependency>
             <groupId>org.openjdk.jol</groupId>
             <artifactId>jol-core</artifactId>
