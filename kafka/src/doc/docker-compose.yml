@@ -2,51 +2,25 @@ version: '3.8'
 
 services:
   zookeeper:
-    image: bitnami/zookeeper:latest
-    container_name: zk
+    image: bitnami/zookeeper:3.8
+    container_name: zookeeper
     ports:
       - "2181:2181"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - E:/kafka-data/zookeeper:/bitnami/zookeeper
 
-  kafka1:
-    image: bitnami/kafka:latest
-    container_name: kafka1
+  kafka:
+    image: bitnami/kafka:3.5.1
+    container_name: kafka
     ports:
       - "9092:9092"
     environment:
-      - KAFKA_BROKER_ID=1
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zk:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
-      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes  # 保留，其他监听配置不要再设置，交给配置文件控制
+    depends_on:
+      - zookeeper
     volumes:
-      - E:/kafka-data/kafka1:/bitnami/kafka
-
-  kafka2:
-    image: bitnami/kafka:latest
-    container_name: kafka2
-    ports:
-      - "9093:9093"
-    environment:
-      - KAFKA_BROKER_ID=2
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zk:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9093
-      - ALLOW_PLAINTEXT_LISTENER=yes
-    volumes:
-      - E:/kafka-data/kafka2:/bitnami/kafka
-
-  kafka3:
-    image: bitnami/kafka:latest
-    container_name: kafka3
-    ports:
-      - "9094:9094"
-    environment:
-      - KAFKA_BROKER_ID=3
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zk:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9094
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9094
-      - ALLOW_PLAINTEXT_LISTENER=yes
-    volumes:
-      - E:/kafka-data/kafka3:/bitnami/kafka
+      - E:/kafka-data/kafka:/bitnami/kafka
+      - E:/kafka-data/config/server.properties:/opt/bitnami/kafka/config/server.properties
