@@ -1,3 +1,5 @@
+package test;
+
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -22,7 +24,7 @@ import java.util.concurrent.Future;
  * | `enable.idempotence` | 幂等保障 | 防止重复发快递 | `true`（建议开启） |
  */
 public class KafkaProducerExample {
-    private static String topicNew = "my-topic-1";
+    public static String topicNew = "my-topic-1";
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
         Properties props = new Properties();
