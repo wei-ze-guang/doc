@@ -2,11 +2,12 @@ package test;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.internals.RecordHeader;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * | 配置项 | 说明 | 通俗理解 | 示例值 |
@@ -25,19 +26,11 @@ import java.util.concurrent.Future;
  */
 public class KafkaProducerExample {
     public static String topicNew = "my-topic-1";
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) {
 
         Properties props = new Properties();
-//        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-//
-//        try (AdminClient admin = AdminClient.create(props)) {
-//            NewTopic topic = new NewTopic(topicNew, 3, (short) 1); // 3个分区，1个副本
-//            admin.createTopics(Collections.singleton(topic)).all().get();
-//            System.out.println("Topic created successfully!");
-//        }
-
-//        Properties props = new Properties();
         props.put("bootstrap.servers", "localhost:9092");
+
         props.put("client.id", "p-1");  //生产者id
 
         props.put("interceptor.classes", MyProducerInterceptor.class.getName());  //生产者拦截器
@@ -56,8 +49,15 @@ public class KafkaProducerExample {
         props.put("retries", 3);  //失败重试次数，默认为0
         props.put("retry.backoff.ms", 200);  // 每次重试间隔200毫秒 ,默认100
 
+//        props.put("max.request.size", 10485760);  // 10MB,单词请求的最大大小
+        /**
+         * he message is 100106 bytes when serialized which is larger than 4096, which is the value of the max.request.size configuration.
+         * 会抛出类似异常
+         */
+        props.put("max.request.size", 4096);  // 10MB,单词请求的最大大小
+
         props.put("batch.size", 16384);  //批次大小
-        props.put("linger.ms", 1);  // 批次等待时间
+        props.put("linger.ms", 100);  // 批次等待时间，如果为0，就会失去 批量发送的优势，因为来一个就发一个，他不会等待
 
         props.put("buffer.memory", 33554432); //缓冲区大小
 
@@ -65,12 +65,36 @@ public class KafkaProducerExample {
         props.put("enable.idempotence", true);  // 幂等性
 
         KafkaProducer<String, String> producer = new KafkaProducer<>(props);
-        for (int i = 0; i < 10; i++) {
+
+        // 创建多个自定义消息头
+        List<Header> headers = new ArrayList<>();
+        headers.add(new RecordHeader("header_key1", "header_value1".getBytes()));
+        headers.add(new RecordHeader("header_key2", "header_value2".getBytes()));
+        for (int i = 0; i < 1; i++) {
             // 有返回值的，就是常见的Future接口的实现，调用get方法会堵塞线程
-            Future<RecordMetadata> send = producer.send(new ProducerRecord<>(topicNew, 0, "key-" + i, "value-" + i));//指定分区之后，key不会计算分区
-            producer.send(new ProducerRecord<>(topicNew,"key-" + i, "value-" + i));  //这样子会计算分区
-            producer.send(new ProducerRecord<>(topicNew,null, "value-" + i));  //轮询
+//            Future<RecordMetadata> send = producer.send(new ProducerRecord<>(
+//                    topicNew,
+//                    null,
+//                    Instant.now().toEpochMilli(),
+//                     "key",
+//                    "value-",
+//                    headers
+//            ));//指定分区之后，key不会计算分区
+            try {
+                producer.send(new ProducerRecord<>(topicNew,"key-" + i, getBitString()));  //这样子会计算分区
+//                producer.send(new ProducerRecord<String,String>(topicNew,null, "value-" + i, null));  //轮询
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
         producer.close();
+    }
+
+    static String getBitString(){
+        StringBuilder sb = new StringBuilder();
+        String base = "0123456789";
+        sb.append(base.repeat(10000));
+        return sb.toString();
     }
 }

@@ -2,20 +2,20 @@
 
 ## 🎯 总览表
 
-| 配置项 | 说明 | 通俗理解 | 示例值 |
-|--------|------|----------|--------|
-| `bootstrap.servers` | Kafka 集群地址 | 快递总公司地址 | `localhost:9092` |
-| `key.serializer` | Key 的序列化器 | 快递编号怎么打包 | `org.apache.kafka.common.serialization.StringSerializer` |
-| `value.serializer` | Value 的序列化器 | 快递内容怎么打包 | `org.apache.kafka.common.serialization.StringSerializer` |
-| `acks` | 确认级别 | 快递是否签收才算成功 | `0` / `1` / `all` |
-| `retries` | 失败重试次数 | 快递员送不出去要不要多送几次 | `3`（默认 0） |
-| `batch.size` | 批次大小（字节） | 一次打包多少快递再发 | `16384` |
-| `linger.ms` | 批次等待时间（毫秒） | 等一会儿凑一批发 | `1` |
-| `buffer.memory` | 缓冲区大小 | 等待发出的快递的仓库容量 | `33554432` |
-| `compression.type` | 压缩算法 | 打包快递用不用压缩 | `none` / `gzip` / `snappy` / `lz4` |
-| `client.id` | 客户端 ID | 快递客户编号 | `producer-client-1` |
-| `enable.idempotence` | 幂等保障 | 防止重复发快递 | `true`（建议开启） |  
-| `retry.backoff.ms` | 重试间隔时间 | | 默认100毫秒 |  
+| 配置项 | 说明 | 通俗理解                            | 示例值 |
+|--------|------|---------------------------------|--------|
+| `bootstrap.servers` | Kafka 集群地址 | 快递总公司地址                         | `localhost:9092` |
+| `key.serializer` | Key 的序列化器 | 快递编号怎么打包                        | `org.apache.kafka.common.serialization.StringSerializer` |
+| `value.serializer` | Value 的序列化器 | 快递内容怎么打包                        | `org.apache.kafka.common.serialization.StringSerializer` |
+| `acks` | 确认级别 | 快递是否签收才算成功                      | `0` / `1` / `all` |
+| `retries` | 失败重试次数 | 快递员送不出去要不要多送几次                  | `3`（默认 0） |
+| `batch.size` | 批次大小（字节） | 一次打包多少快递再发                      | `16384` |
+| `linger.ms` | 批次等待时间（毫秒） | 等一会儿凑一批发，如果为0，就失去批量发送的优势，来一个发一个 | `1` |
+| `buffer.memory` | 缓冲区大小 | 等待发出的快递的仓库容量                    | `33554432` |
+| `compression.type` | 压缩算法 | 打包快递用不用压缩                       | `none` / `gzip` / `snappy` / `lz4` |
+| `client.id` | 客户端 ID | 快递客户编号                          | `producer-client-1` |
+| `enable.idempotence` | 幂等保障 | 防止重复发快递                         | `true`（建议开启） |  
+| `retry.backoff.ms` | 重试间隔时间 |                                 | 默认100毫秒 |  
 ### 这里补充几点注意事项：
 - 重试是自动的，你不需要自己写循环，KafkaProducer 内部帮你处理。
 - 发送超时时间：重试不能无限等待，delivery.timeout.ms 会限制整个发送（包括重试）最长等待时间，超过就失败。
@@ -70,7 +70,7 @@ Producer 内部维护一个缓冲区用来缓存待发送的消息，避免每�
 ---  
 
 - 类似的常用参数及说明  
-- 
+
 | 参数名                   | 含义           | 作用                                                           |
 | --------------------- | ------------ | ------------------------------------------------------------ |
 | `compression.type`    | 压缩类型         | 对消息批次压缩，支持 `none`, `gzip`, `snappy`, `lz4`, `zstd`，减少网络传输和存储 |

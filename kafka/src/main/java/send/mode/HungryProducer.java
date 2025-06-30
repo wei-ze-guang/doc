@@ -1,25 +1,26 @@
 package send.mode;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import test.KafkaProducerExample;
 
 import java.util.Properties;
-import java.util.concurrent.Future;
 
 /**
- * 用来演示三种发送方式的生产者
+ * 饿汉式形式，不是在静态代码里面
  */
-public class ProducerSendMode {
-    private KafkaProducer<String,String> kafkaProducer;
+public class HungryProducer {
+    private static HungryProducer instance = new HungryProducer();
 
-    //采用双重检查方法获取
-    private static volatile ProducerSendMode producer;
+    KafkaProducer<String, String> kafkaProducer;
 
-    private ProducerSendMode(){
+    public KafkaProducer<String, String> getKafkaProducer() {
+        return kafkaProducer;
+    }
+
+    public static HungryProducer getInstance() {
+        return instance;
+    }
+    private HungryProducer() {
         Properties props = new Properties();
-
         props.put("bootstrap.servers", "localhost:9092");
         props.put("client.id", "p-1");  //生产者id
         props.put("interceptor.classes", test.MyProducerInterceptor.class.getName());  //生产者拦截器
@@ -38,7 +39,7 @@ public class ProducerSendMode {
         props.put("retry.backoff.ms", 200);  // 每次重试间隔200毫秒 ,默认100
 
         props.put("batch.size", 16384);  //批次大小
-        props.put("linger.ms", 1);  // 批次等待时间
+        props.put("linger.ms", 5000);  // 批次等待时间
 
         props.put("buffer.memory", 33554432); //缓冲区大小
 
@@ -46,35 +47,8 @@ public class ProducerSendMode {
         props.put("enable.idempotence", true);  // 幂等性
 
         KafkaProducer<String, String> producer = new KafkaProducer<>(props);
+
         this.kafkaProducer = producer;
-    }
-
-    /**
-     * DCL创建
-     * @return
-     */
-    public static  ProducerSendMode getInstance(){
-        if(producer == null){
-            synchronized (ProducerSendMode.class){
-                if(producer == null){
-                    producer = new ProducerSendMode();
-                    return producer;
-                }
-            }
-        }
-        return producer;
-    }
-
-    public Future<RecordMetadata> send(String value){
-        /**
-         * key  是null。轮询方式
-         */
-        Future send = kafkaProducer.send(new ProducerRecord<String,String>(KafkaProducerExample.topicNew,null,value));
-        return send;
-    }
-
-    public void close() {
-        kafkaProducer.close();
     }
 
 }

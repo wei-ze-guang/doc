@@ -22,9 +22,9 @@ public class MyProducerInterceptor implements ProducerInterceptor<String, String
     @Override
     public void onAcknowledgement(RecordMetadata metadata, Exception exception) {
         if (exception == null) {
-            System.out.println("消息发送成功，offset=" + metadata.offset());
+            System.out.println("拦截器的收到返回的信息消息发送成功，offset=" + metadata.offset());
         } else {
-            System.out.println("消息发送失败：" + exception.getMessage());
+            System.out.println("拦截器的收到返回的信息消息发送失败：" + exception.getMessage());
         }
     }
 

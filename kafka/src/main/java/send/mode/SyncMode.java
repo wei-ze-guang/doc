@@ -2,6 +2,8 @@ package send.mode;
 
 import org.apache.kafka.clients.producer.RecordMetadata;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -9,7 +11,16 @@ import java.util.concurrent.Future;
  */
 public class SyncMode {
     public static void main(String[] args) {
-       InnerSingletonProducer producer = InnerSingletonProducer.getInstance();
+
+       test2();
+    }
+
+    /**
+     * 方法发
+     */
+    static void test1(){
+        InnerSingletonProducer producer = InnerSingletonProducer.getInstance();
+        List<Future<RecordMetadata>> futures = new LinkedList<Future<RecordMetadata>>();
         for (int i = 0; i < 100; i++) {
             // 有返回值的，就是常见的Future接口的实现，调用get方法会堵塞线程
             try{
@@ -34,5 +45,46 @@ public class SyncMode {
             }
         }
         producer.close();
+    }
+
+    static void test2(){
+        /**
+         * 这种方法获取消息的话会堵塞当前线程，但是这种的话不会堵塞发送的时候，只是获取结果的时候会
+         */
+        InnerSingletonProducer producer = InnerSingletonProducer.getInstance();
+
+        List<Future<RecordMetadata>> futures = new LinkedList<Future<RecordMetadata>>();
+        for (int i = 0; i < 100; i++) {
+            // 有返回值的，就是常见的Future接口的实现，调用get方法会堵塞线程
+            try{
+                try{
+                    Future<RecordMetadata> send = producer.send(String.valueOf(i));
+                    futures.add(send);
+                }catch (RuntimeException e){
+                    e.printStackTrace();
+                };
+
+            }catch(RuntimeException e) {
+                e.printStackTrace();
+            }
+        }
+        /**
+         * 他内部会堵塞线程的，会调用flush
+         */
+        producer.close();
+        futures.forEach(i ->{
+            try {
+                RecordMetadata recordMetadata = i.get();
+                System.out.println("同步接收信息:"+recordMetadata.offset());
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        });
+    }
+
+    static void test3Flush(){
+        /**
+         * 直接调用flush发送，调用这个之后可以不用close()
+         */
     }
 }

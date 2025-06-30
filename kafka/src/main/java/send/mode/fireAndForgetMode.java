@@ -1,6 +1,6 @@
 package send.mode;
 
-import org.apache.kafka.clients.producer.internals.ProducerMetadata;
+import org.apache.kafka.clients.producer.RecordMetadata;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -16,11 +16,11 @@ public class fireAndForgetMode {
         for (int i = 0; i < 100; i++) {
             // 有返回值的，就是常见的Future接口的实现，调用get方法会堵塞线程
             try{
-                Future<ProducerMetadata> send = producer.send(String.valueOf(i));
+                Future<RecordMetadata> send = producer.send(String.valueOf(i));
             }catch(RuntimeException e) {
                 e.printStackTrace();
             }
         }
-        producer.close();
+//        producer.close();
     }
 }

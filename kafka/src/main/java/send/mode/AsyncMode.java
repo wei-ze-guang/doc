@@ -35,6 +35,5 @@ public class AsyncMode {
         }
         producer.close();
 
-
     }
 }
