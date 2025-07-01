@@ -49,12 +49,11 @@ public class KafkaProducerExample {
         props.put("retries", 3);  //失败重试次数，默认为0
         props.put("retry.backoff.ms", 200);  // 每次重试间隔200毫秒 ,默认100
 
-//        props.put("max.request.size", 10485760);  // 10MB,单词请求的最大大小
         /**
          * he message is 100106 bytes when serialized which is larger than 4096, which is the value of the max.request.size configuration.
          * 会抛出类似异常
          */
-        props.put("max.request.size", 4096);  // 10MB,单词请求的最大大小
+        props.put("max.request.size", 10485760);  // 10MB,单词请求的最大大小
 
         props.put("batch.size", 16384);  //批次大小
         props.put("linger.ms", 100);  // 批次等待时间，如果为0，就会失去 批量发送的优势，因为来一个就发一个，他不会等待
@@ -62,6 +61,10 @@ public class KafkaProducerExample {
         props.put("buffer.memory", 33554432); //缓冲区大小
 
         props.put("compression.type", "gzip");  // none / gzip / snappy / lz4 压缩算法
+        /**
+         * 开启了幂等性之后
+         * max.in.flight.requests.per.connection 他会自动设置为一，你设置了会被覆盖
+         */
         props.put("enable.idempotence", true);  // 幂等性
 
         KafkaProducer<String, String> producer = new KafkaProducer<>(props);

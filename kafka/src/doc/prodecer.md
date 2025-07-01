@@ -2,20 +2,32 @@
 
 ## 🎯 总览表
 
-| 配置项 | 说明 | 通俗理解                            | 示例值 |
-|--------|------|---------------------------------|--------|
-| `bootstrap.servers` | Kafka 集群地址 | 快递总公司地址                         | `localhost:9092` |
-| `key.serializer` | Key 的序列化器 | 快递编号怎么打包                        | `org.apache.kafka.common.serialization.StringSerializer` |
-| `value.serializer` | Value 的序列化器 | 快递内容怎么打包                        | `org.apache.kafka.common.serialization.StringSerializer` |
-| `acks` | 确认级别 | 快递是否签收才算成功                      | `0` / `1` / `all` |
-| `retries` | 失败重试次数 | 快递员送不出去要不要多送几次                  | `3`（默认 0） |
-| `batch.size` | 批次大小（字节） | 一次打包多少快递再发                      | `16384` |
-| `linger.ms` | 批次等待时间（毫秒） | 等一会儿凑一批发，如果为0，就失去批量发送的优势，来一个发一个 | `1` |
-| `buffer.memory` | 缓冲区大小 | 等待发出的快递的仓库容量                    | `33554432` |
-| `compression.type` | 压缩算法 | 打包快递用不用压缩                       | `none` / `gzip` / `snappy` / `lz4` |
-| `client.id` | 客户端 ID | 快递客户编号                          | `producer-client-1` |
-| `enable.idempotence` | 幂等保障 | 防止重复发快递                         | `true`（建议开启） |  
-| `retry.backoff.ms` | 重试间隔时间 |                                 | 默认100毫秒 |  
+| 配置项 | 说明                                                                       | 通俗理解     | 示例值                                                      |
+|--------|--------------------------------------------------------------------------|----------|----------------------------------------------------------|
+| `bootstrap.servers` | Kafka 集群地址                                                               | 快递总公司地址  | `localhost:9092`                                         |
+| `key.serializer` | Key 的序列化器                                                                | 快递编号怎么打包 | `org.apache.kafka.common.serialization.StringSerializer` |
+| `value.serializer` | Value 的序列化器                                                              | 快递内容怎么打包 | `org.apache.kafka.common.serialization.StringSerializer` |
+| `acks` | 确认级别                                                                     | 快递是否签收才算成功 | `0` / `1` / `all`                                        |
+| `retries` | 失败重试次数                                                                   | 快递员送不出去要不要多送几次 | `3`（默认 0）                                                |
+| `batch.size` | 批次大小（字节）                                                                 | 一次打包多少快递再发 | `16384`                                                  |
+| `linger.ms` | 批次等待时间（毫秒）                                                               | 等一会儿凑一批发，如果为0，就失去批量发送的优势，来一个发一个 | `1`                                                      |
+| `buffer.memory` | 缓冲区大小                                                                    | 等待发出的快递的仓库容量 | `33554432`                                               |
+| `compression.type` | 压缩算法                                                                     | 打包快递用不用压缩 | `none` / `gzip` / `snappy` / `lz4`                       |
+| `client.id` | 客户端 ID                                                                   | 快递客户编号   | `producer-client-1`                                      |
+| `enable.idempotence` | 幂等保障                                                                     | 防止重复发快递  | `true`（建议开启）                                             |  
+| `retry.backoff.ms` | 重试间隔时间                                                                   |          | 默认100毫秒                                                  |  
+| `max.request.size` | 单体网络请求的最大发送大小，如果消息超过这个会抛出异常                                              |          | 默认100毫秒                                                  |  
+| `delivery.timeout.ms ` | 消息发送的最大等待时间，send()方法开始算即从生产者发送消息开始，到收到 Kafka 集群的成功确认，最多允许的时间。默认2秒 -1表示无限 |          | 2秒                                                       |
+| `request.timeout.ms ` | 生产者发送请求后等待 Kafka broker 响应的最大时间。这个是发送网络请求开始算，和上面不同                       |          |                                                 |  
+### 容易漏掉的参数  
+- 容易被忽视的配置 包括：
+  - linger.ms：增加等待时间，批量发送消息。
+  - max.in.flight.requests.per.connection：控制请求并发。
+  - max.request.size：设置请求的最大字节数，避免过大的请求失败。
+  - retry.backoff.ms：重试的间隔时间，控制重试频率。
+####  max.in.flight.requests.per.connection这个参数需要重点了解，他跟顺序性和事务acks和事务有很大关系，这时候最好设置为1
+max.in.flight.requests.per.connection 在 enable.idempotence=true 启用时，
+会被 Kafka 自动设置为 1。这是因为，启用幂等性时，Kafka 需要确保消息顺序性，避免在并发情况下发生消息乱序或重复提交的情况。
 ### 这里补充几点注意事项：
 - 重试是自动的，你不需要自己写循环，KafkaProducer 内部帮你处理。
 - 发送超时时间：重试不能无限等待，delivery.timeout.ms 会限制整个发送（包括重试）最长等待时间，超过就失败。
