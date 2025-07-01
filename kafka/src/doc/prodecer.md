@@ -27,7 +27,7 @@
   - retry.backoff.ms：重试的间隔时间，控制重试频率。
 ####  max.in.flight.requests.per.connection这个参数需要重点了解，他跟顺序性和事务acks和事务有很大关系，这时候最好设置为1
 max.in.flight.requests.per.connection 在 enable.idempotence=true 启用时，
-会被 Kafka 自动设置为 1。这是因为，启用幂等性时，Kafka 需要确保消息顺序性，避免在并发情况下发生消息乱序或重复提交的情况。
+会被 Kafka 自动设置为 <=5。可以看源码，这是因为，启用幂等性时，Kafka 需要确保消息顺序性，避免在并发情况下发生消息乱序或重复提交的情况。
 ### 这里补充几点注意事项：
 - 重试是自动的，你不需要自己写循环，KafkaProducer 内部帮你处理。
 - 发送超时时间：重试不能无限等待，delivery.timeout.ms 会限制整个发送（包括重试）最长等待时间，超过就失败。

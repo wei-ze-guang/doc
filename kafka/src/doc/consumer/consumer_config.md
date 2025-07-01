@@ -16,7 +16,7 @@
    │
    │
    ├────► 发送 Fetch 请求 给服务端
-   │         └─ 附带 max.poll.records、fetch.max.bytes、max.partition.fetch.bytes 等参数
+   │         └─ 附带 fetch.max.bytes、max.partition.fetch.bytes 等参数
    │
    │
 服务端收到请求
@@ -58,7 +58,56 @@ Kafka 是按分区拉取的，一次 poll() 会包含多个分区的数据。
 所以你 poll() 后，可能看到很多条消息，来自不同的分区。
 举例来说：你有 3 个分区，Kafka 一次 FetchResponse 就可能包含这 3 个分区的消息，但这仍然是“一次响应”。
 ```  
+* 源码  一次poll会发生多个fetch
+```java
+    public ConsumerRecords<K, V> poll(Duration timeout) {
+        Timer timer = this.time.timer(timeout);
+        this.acquireAndEnsureOpen();
 
+        try {
+            this.wakeupTrigger.setFetchAction(this.fetchBuffer);
+            this.kafkaConsumerMetrics.recordPollStart(timer.currentTimeMs());
+            if (this.subscriptions.hasNoSubscriptionOrUserAssignment()) {
+                throw new IllegalStateException("Consumer is not subscribed to any topics or assigned any partitions");
+            } else {
+                this.applicationEventHandler.add(new PollApplicationEvent(timer.currentTimeMs()));
+
+                do {
+                    this.wakeupTrigger.maybeTriggerWakeup();
+                    this.updateAssignmentMetadataIfNeeded(timer);
+                    Fetch<K, V> fetch = this.pollForFetches(timer);
+                    if (!fetch.isEmpty()) {
+                        if (fetch.records().isEmpty()) {
+                            this.log.trace("Returning empty records from `poll()` since the consumer's position has advanced for at least one topic partition");
+                        }
+
+                        ConsumerRecords var4 = this.interceptors.onConsume(new ConsumerRecords(fetch.records()));
+                        return var4;
+                    }
+                } while(timer.notExpired());
+
+                ConsumerRecords var8 = ConsumerRecords.empty();
+                return var8;
+            }
+        } finally {
+            this.kafkaConsumerMetrics.recordPollEnd(timer.currentTimeMs());
+            this.wakeupTrigger.clearTask();
+            this.release();
+        }
+    }
+/**
+ * 原因分析
+ Kafka消费者是多分区消费的
+ 一个消费者通常会被分配多个分区（partition）。poll() 调用会尝试从所有这些分区拉取数据。
+ Fetcher 发起多分区的并发 Fetch 请求
+ Fetcher 底层会针对所有分配的分区并发发送 Fetch 请求。它会把每个分区的拉取结果缓存起来。
+ poll() 聚合所有分区的消息返回
+ 当 poll() 收到来自不同分区的 Fetch 返回结果后，会将所有这些分区的消息汇总成一个 ConsumerRecords 对象返回。
+ 一次 poll() 是一次批量拉取
+ poll() 不是针对单个分区拉取，而是从消费者所有分配的分区批量拉取数据，这样能提高效率和吞吐。
+ */
+
+```
 
 ### 易出错  
 小结

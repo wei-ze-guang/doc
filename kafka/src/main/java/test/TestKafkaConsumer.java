@@ -45,7 +45,13 @@ public class TestKafkaConsumer {
         ConsumerRecords<String, String> records = null;
         while (running.get()) {
             try {
+                /**
+                 * 下面这个参数是
+                 * 如果在规定时间内，服务端返回数据，这里也返回，但是如果客户端还没返回这里会抛出异常，
+                 * 如果一直消费这里设置为无限大，一直拉取就好了
+                 */
                 records = consumer.poll(100);
+
                 if (records!= null && !records.isEmpty()) {
                     consumer.commitSync(); // 推荐 sync 保证提交成功
                 }
@@ -76,13 +82,16 @@ public class TestKafkaConsumer {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());  // 键的反序列化器
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());  // 值的反序列化器
 
+        /**
+         * 延迟性和吞吐量下面很重要，延迟性要求高设置为1最好，要求吞吐量的话设置越高最好，
+         */
         props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 1);  // 不要设置过高,消费者每次最少拉取多少字节的数据才返回，默认1 ,这个数据才是最重要的
 
         props.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, 52428800);//默认 50BM。一次拉取数据的最大总和 ，这个不是那么重要
 
-        props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, 104857600);  //单个分区拉取的最字节数量字节
+        props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, 104857600);  //单个分区拉取的最字节数量字节，有能会被突破
 
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);  //单词拉取的最大信息条数，是条数
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);  //单次拉取的最大信息条数，是条数
 
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);//毫秒  	心跳超时，消费者被判定死亡前的最长等待时间（毫秒）
 
