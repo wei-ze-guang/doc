@@ -73,7 +73,7 @@ public class KafkaProducerExample {
         List<Header> headers = new ArrayList<>();
         headers.add(new RecordHeader("header_key1", "header_value1".getBytes()));
         headers.add(new RecordHeader("header_key2", "header_value2".getBytes()));
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 10000; i++) {
             // 有返回值的，就是常见的Future接口的实现，调用get方法会堵塞线程
 //            Future<RecordMetadata> send = producer.send(new ProducerRecord<>(
 //                    topicNew,

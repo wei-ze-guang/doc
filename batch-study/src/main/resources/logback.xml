@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 控制台输出格式：彩色、带线程、类名、行号 -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] [%X{ip}]  %highlight(%-5level) [%cyan(%thread)] - %green(%logger{36}):%magenta(%line) - %msg%n"/>
+
+    <!-- 控制台输出 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 打印 SQL 日志 -->
+    <logger name="java.sql" level="DEBUG"/>
+    <logger name="jdbc.sql only" level="DEBUG"/>
+
+    <!-- 显示 MyBatis 执行的 SQL -->
+    <logger name="org.apache.ibatis" level="DEBUG"/>
+    <logger name="org.mybatis" level="DEBUG"/>
+    <logger name="org.mybatis.spring" level="DEBUG"/>
+
+    <!-- 你自己的业务包，可以手动调成 DEBUG -->
+    <!--    <logger name="com.chat" level="DEBUG"/>-->
+
+    <!-- Root 根日志 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

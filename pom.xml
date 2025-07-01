@@ -118,6 +118,16 @@
                 <version>1.15</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.30</version> <!-- 推荐写具体版本，例如 1.18.32 -->
+                <scope>provided</scope>
+            </dependency>
+
+
+
+
         </dependencies>
     </dependencyManagement>
 
