@@ -4,10 +4,14 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaException;
+import org.apache.kafka.common.errors.ProducerFencedException;
 import test.KafkaProducerExample;
 
 import java.util.Properties;
 
+/**
+ * kafka事务是可以跨分区的，幂等性是不能跨分区的
+ */
 public class TransactionKafka {
     public static void main(String[] args) {
         // 获取配置
@@ -25,7 +29,17 @@ public class TransactionKafka {
 
         try {
             // 开始事务
-            producer.beginTransaction();
+            try {
+                /**
+                 * 初始化事务
+                 */
+                producer.initTransactions();
+
+                producer.beginTransaction();
+            } catch (ProducerFencedException e) {
+                System.out.println("Producer fenced");
+                throw new RuntimeException(e);
+            }
 
             // 发送消息
             producer.send(new ProducerRecord<>(KafkaProducerExample.topicNew, "key", "value"));
@@ -35,10 +49,13 @@ public class TransactionKafka {
         } catch (KafkaException e) {
             // 捕获 KafkaException 并回滚事务
             System.err.println("Error during transaction: " + e.getMessage());
+            /**
+             * 回滚或者中断
+             */
             producer.abortTransaction();
         } finally {
             // 关闭生产者实例
-            producer.close();
+//            producer.close();
         }
     }
 }

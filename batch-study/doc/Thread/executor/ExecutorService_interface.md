@@ -374,7 +374,7 @@ executor.shutdown();
     throws InterruptedException;
 
 ```  
-###     <T> T invokeAny(Collection<? extends Callable<T>> tasks,long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException;方法  
+###     <T> T invokeAll(Collection<? extends Callable<T>> tasks,long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException;方法  
 - 额外说明：
   - invokeAny 只要有一个任务成功完成就返回它的结果，其他任务会被取消；
   - 如果超时或线程中断，则会提前结束等待并抛异常；
@@ -416,9 +416,7 @@ executor.shutdown();
 ```java
 /**
  * 执行给定的一批 Callable 任务，返回其中一个成功完成的任务结果（即任务未抛异常）。
- * 
  * 一旦某个任务正常返回或抛出异常，所有未完成的任务都会被取消。
- * 
  * 注意：如果在执行过程中修改传入的任务集合，结果是未定义的。
  *
  * @param tasks 要执行的任务集合
