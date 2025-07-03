@@ -6,6 +6,7 @@ import java.util.Properties;
 
 /**
  * 下面是1K的
+ * 工厂方法模式
  */
 class Minio1kKafkaConsumer implements KafkaConsumerInterface {
     private KafkaConsumer<String, String> consumer;

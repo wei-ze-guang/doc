@@ -6,6 +6,7 @@ import java.util.Properties;
 
 /**
  * 这里为了简单，直接在内部写
+ * 工厂方法模式
  */
 
 class Minio1BytesKafkaConsumer implements KafkaConsumerInterface {

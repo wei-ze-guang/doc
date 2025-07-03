@@ -18,7 +18,7 @@ Future（接口） java.util.concurrent
 
 ``` 
 
-## FutureFuture实现类
+## Future接口的 一些方法
 - 源代码 ,这个源代码你不看也可以
 ```java
 
@@ -68,6 +68,34 @@ public interface Future<V> {
      * @return 如果任务由于已完成而无法被取消，则返回 {@code false}；
      * 否则返回 {@code true}。如果两个或多个线程导致任务被取消，
      * 则至少其中一个线程返回 {@code true}。实现可能提供更强的保证。
+     */
+    /**
+     *    Possible state transitions:
+     * NEW -> COMPLETING -> NORMAL
+     * NEW -> COMPLETING -> EXCEPTIONAL
+     * NEW -> CANCELLED
+     * NEW -> INTERRUPTING -> INTERRUPTED 
+     * INTERRUPTING 重点讲这个状态，这个状态表示线程正在被取消状态，为什么呢，假如同时给这个线程发出cancel命令，看下面，由于cancel不是原子性才做，可能这个线程正在cancel
+     * 但是这个线程某种原因被抢夺了资源下，这个实现线程还没有真正被取消，另外一个线程又对该线程发出取消指令，那么这个时间就能够判断这个线程之前 
+     * 是不是被取消过了
+     * 
+     * if (state == NEW &&
+     UNSAFE.compareAndSwapInt(this, stateOffset, NEW,
+     mayInterruptIfRunning ? INTERRUPTING : CANCELLED)) {
+     if (mayInterruptIfRunning) {
+     try {
+     Thread t = runner;
+     if (t != null)
+     t.interrupt();
+     } finally {
+     // 设置为真正的终态
+     setState(INTERRUPTED);
+     }
+     }
+     // 唤醒等待线程
+     finishCompletion();
+     return true;
+     }
      */
     boolean cancel(boolean mayInterruptIfRunning);
 

@@ -1,15 +1,16 @@
 ## 消费者参数  
-| 参数名                                                     | 类型        | 对谁生效               | 说明                       |
-| ------------------------------------------------------- | --------- | ------------------ | ------------------------ |
-| `bootstrap.servers`                                     | 客户端 → 服务端 | Kafka 集群           | 消费者连接哪个 Kafka 集群         |
-| `group.id`                                              | 客户端 → 协调器 | 消费者组               | 同组共享 offset 和分区          |
-| `key.deserializer` `value.deserializer`                 | 客户端       | 消费者                | 如何把字节反序列化为 Java 对象       |
-| `auto.offset.reset`                                     | 客户端       | 当前消费者组的分区          | 如果没有 offset，从哪里开始消费      |
-| `enable.auto.commit`                                    | 客户端       | 当前消费者              | 是否自动提交 offset            |
-| `fetch.min.bytes` `fetch.max.bytes` `fetch.max.wait.ms` | 客户端 & 服务端 | 拉取请求（消费者 → broker） | 拉数据触发的条件                 |
-| `max.poll.records`                                      | 客户端       | poll() 线程          | 单次 poll 返回最多多少条消息        |
-| `session.timeout.ms` `heartbeat.interval.ms`            | 客户端 → 协调器 | 消费者组               | 判断消费者是否“挂了”              |
-| `max.poll.interval.ms`                                  | 客户端 → 协调器 | 当前线程               | 控制多久必须 poll 一次，否则被踢出消费者组 |   
+| 参数名                                                     | 类型        | 对谁生效                  | 说明                       |
+|---------------------------------------------------------| --------- |-----------------------|--------------------------|
+| `bootstrap.servers`                                     | 客户端 → 服务端 | Kafka 集群              | 消费者连接哪个 Kafka 集群         |
+| `group.id`                                              | 客户端 → 协调器 | 消费者组                  | 同组共享 offset 和分区          |
+| `key.deserializer` `value.deserializer`                 | 客户端       | 消费者                   | 如何把字节反序列化为 Java 对象       |
+| `auto.offset.reset`                                     | 客户端       | 当前消费者组的分区             | 如果没有 offset，从哪里开始消费      |
+| `enable.auto.commit`                                    | 客户端       | 当前消费者                 | 是否自动提交 offset            |
+| `auto.commit.interval.ms`                               | 客户端       | 当前消费者  ，前提是开启了自动提交才有效 | 定期提交已经拉取到的最新每个分区offset   |
+| `fetch.min.bytes` `fetch.max.bytes` `fetch.max.wait.ms` | 客户端 & 服务端 | 拉取请求（消费者 → broker）    | 拉数据触发的条件                 |
+| `max.poll.records`                                      | 客户端       | poll() 线程             | 单次 poll 返回最多多少条消息        |
+| `session.timeout.ms` `heartbeat.interval.ms`            | 客户端 → 协调器 | 消费者组                  | 判断消费者是否“挂了”              |
+| `max.poll.interval.ms`                                  | 客户端 → 协调器 | 当前线程                  | 控制多久必须 poll 一次，否则被踢出消费者组 |   
 ### Kafka 消费者 poll() 全流程参数作用时间线图（文字版）  
 ```text
 客户端线程 —— 调用 poll(timeout=100) 开始阻塞等待

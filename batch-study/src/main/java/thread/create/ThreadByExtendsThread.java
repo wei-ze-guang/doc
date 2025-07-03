@@ -23,7 +23,7 @@ public class ThreadByExtendsThread implements CreateThreadInterface{
         /**
          * 这种方法的话执行体是空的不会出错的
          */
-        return new Thread();
+        return getExtendsThread();
     }
     /**
      * 只需要实现上面的接口方法，但是我们可以扩展
@@ -33,7 +33,7 @@ public class ThreadByExtendsThread implements CreateThreadInterface{
         /**
          * 这种就是啥也不做,原生的
          */
-        return getExtendsThread();
+        return new Thread();
     }
 
     private Thread getExtendsThread() {

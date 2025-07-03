@@ -46,7 +46,9 @@ public class Test {
      */
     static void testAssign(){
         Minio1BytesKafkaConsumer minio1BytesKafkaConsumer= new Minio1BytesKafkaConsumer();
+
         KafkaConsumer<String, String> consumer = minio1BytesKafkaConsumer.createConsumer();
+
         TopicPartition topicPartition = getTopicPartition();
 
         consumer.assign(Collections.singletonList(topicPartition));

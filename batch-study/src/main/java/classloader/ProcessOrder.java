@@ -45,7 +45,7 @@ public class ProcessOrder {
         System.out.println("执行static之前b的值:b="+b);
         c = 500;//在这里写的话可以不用构造器，
         b = 100;
-        System.out.println("在代码块中设置b的值是100,"+"b="+b);
+        System.out.println("在代码块中设置b的值是,"+"b="+b);
     }
 
     public ProcessOrder() {

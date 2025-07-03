@@ -1,6 +1,17 @@
 # Thread 类
 - Thread类里面的native方法  
-- 
+1. Java 调用 native 方法的本质
+- 任何 Java 的实例方法调用 native 实现时，JVM 会自动传递两个隐藏参数：
+  - JNIEnv*：指向 JNI 环境的指针，包含 JNI 函数表。
+  - jobject：调用该方法的 Java 对象的引用（即 this 指针）。
+比如：  
+```java
+private native void start0();
+
+//  实际上是   JNIEXPORT void JNICALL Java_java_lang_Thread_start0(JNIEnv *env, jobject thisObj);
+```
+
+
 | 方法名                                                               | 实例/类方法 | 功能简述              | 作用与调用时机                                                 |
 | ----------------------------------------------------------------- | ------ | ----------------- | ------------------------------------------------------- |
 | `private native void start0()`                                    | 实例方法   | 启动本地线程            | `Thread.start()` 时调用，触发 JVM 创建操作系统线程                    |
@@ -21,78 +32,52 @@
 | BLOCKED        | 阻塞状态，线程因为等待监视器锁（synchronized锁）而被阻塞。 `Object#wait() Object.wait`                                                  |
 | WAITING        | 等待状态，线程无限期等待另一个线程显式通知（如调用`wait()`、`join()`没有超时）。                                                                 |
 | TIMED\_WAITING | 超时等待状态，线程等待一定时间后自动返回（如`sleep(time)`、`join(time)`、`wait(time)``LockSupport#parkNanos`,`LockSupport#parkUntil ` ）。 |
-| TERMINATED     | 终止状态，线程执行完毕或因异常退出。                                                                                               |    
-
--  下面是源码
+| TERMINATED     | 终止状态，线程执行完毕或因异常退出。                                                                                               |      
+## Thread的构造函数    下面他run方法执行情况
+- Thread类里面有一个Runnable的成员变量  
 ```java
-
-    public enum State {
-        /**
-         * Thread state for a thread which has not yet started.
-         */
-        NEW,
-
-        /**
-         * Thread state for a runnable thread.  A thread in the runnable
-         * state is executing in the Java virtual machine but it may
-         * be waiting for other resources from the operating system
-         * such as processor.
-         */
-        RUNNABLE,
-
-        /**
-         * Thread state for a thread blocked waiting for a monitor lock.
-         * A thread in the blocked state is waiting for a monitor lock
-         * to enter a synchronized block/method or
-         * reenter a synchronized block/method after calling
-         * {@link Object#wait() Object.wait}.
-         */
-        BLOCKED,
-
-        /**
-         * Thread state for a waiting thread.
-         * A thread is in the waiting state due to calling one of the
-         * following methods:
-         * <ul>
-         *   <li>{@link Object#wait() Object.wait} with no timeout</li>
-         *   <li>{@link #join() Thread.join} with no timeout</li>
-         *   <li>{@link LockSupport#park() LockSupport.park}</li>
-         * </ul>
-         *
-         * <p>A thread in the waiting state is waiting for another thread to
-         * perform a particular action.
-         *
-         * For example, a thread that has called {@code Object.wait()}
-         * on an object is waiting for another thread to call
-         * {@code Object.notify()} or {@code Object.notifyAll()} on
-         * that object. A thread that has called {@code Thread.join()}
-         * is waiting for a specified thread to terminate.
-         */
-        WAITING,
-
-        /**
-         * Thread state for a waiting thread with a specified waiting time.
-         * A thread is in the timed waiting state due to calling one of
-         * the following methods with a specified positive waiting time:
-         * <ul>
-         *   <li>{@link #sleep Thread.sleep}</li>
-         *   <li>{@link Object#wait(long) Object.wait} with timeout</li>
-         *   <li>{@link #join(long) Thread.join} with timeout</li>
-         *   <li>{@link LockSupport#parkNanos LockSupport.parkNanos}</li>
-         *   <li>{@link LockSupport#parkUntil LockSupport.parkUntil}</li>
-         * </ul>
-         */
-        TIMED_WAITING,
-
-        /**
-         * Thread state for a terminated thread.
-         * The thread has completed execution.
-         */
-        TERMINATED;
+    /* What will be run. */
+    private Runnable target;
+```
+- 你会发现他能直接使Thread类，但是你不继承重写run方法的话，执行的内容时空
+  - 继承他重写他的run方法就可以了
+  - 或者传入一个Runnable接口的实现类通过他的构造函数传进去也可以，Thread的target就会变为你的传进去的Runnable接口的实现  看下面的Thread构造函数
+```java
+    public Thread(Runnable target) {
+        this(null, target, "Thread-" + nextThreadNum(), 0);
+    }
+```
+```java
+/**
+ * 就是为什么需要实现这个接口的原因
+ *这个target必须要有一个run方法 
+ */
+    @Override
+    public void run() {
+        if (target != null) {
+            target.run();
+        }
     }
 ```  
-###  ，这里成为构造方法1或者说初始化线程构造器哦，Thread通过构造器链，对不不同方法创建的线程，进行包装，各个创建的线程最后都会经过下面的初始化    
-- 这个是一个私有构造方法，我们不能自己使用
+  - 但是Callable怎么没有了？ Callable需要通过FutureTask实现类，封装才会变为Runnable，因为FutureTask实现了Runnable接口， 这个需要看Future接口实现类FutureTask的实现类,内容再后面
+- 
+| 构造方法签名                                                                                                 | 参数说明                       | 适用场景                                 |
+| ------------------------------------------------------------------------------------------------------ | -------------------------- | ------------------------------------ |
+| `Thread()`                                                                                             | 无参数，默认使用当前线程的线程组、默认线程名、无任务 | 创建空线程，手动覆盖 `run()` 方法或通过子类           |
+| `Thread(Runnable target)`                                                                              | 指定执行任务（`Runnable`），线程组默认   | 最常用，传入任务对象即可                         |
+| `Thread(Runnable target, String name)`                                                                 | 指定任务和线程名                   | 为线程取名字，方便调试                          |
+| `Thread(String name)`                                                                                  | 指定线程名                      | 任务为空，一般用于继承 `Thread` 后手动写 `run()`    |
+| `Thread(ThreadGroup group, Runnable target)`                                                           | 指定线程组和任务                   | 一般用于线程分组管理（不常见）                      |
+| `Thread(ThreadGroup group, Runnable target, String name)`                                              | 指定线程组、任务、线程名               | 更完整的线程构造方式                           |
+| `Thread(ThreadGroup group, Runnable target, String name, long stackSize)`                              | 再加一个线程栈大小参数                | 高级用法，JVM 不一定支持 `stackSize`           |
+| `Thread(ThreadGroup group, String name)`                                                               | 指定线程组和名字，无任务               | 很少使用，一般自己实现 `run()`                  |
+| `Thread(ThreadGroup group, Runnable target, String name, long stackSize, boolean inheritThreadLocals)` | JDK 14+ 新增                 | 是否继承父线程的 `ThreadLocal`，更高级的控制手段（不常用） |
+
+
+
+###  ，这里私有构造方法1 或者说初始化线程构造器哦，Thread通过构造器链，对不不同方法创建的线程，进行包装，各个创建的线程最后都会经过下面的初始化    
+- 这个是一个私有构造方法，我们不能自己使用，这个私有构造方法是因为每一个线程都需要优先级，名字，是守护线程还是用户线程，如果用户创建线程的没写这些一般通过
+这里把线程的一些配置设置为父线程的一样的配置，如果用户制定了就使用用户的
 ```java
     /**
      * Initializes a Thread.
@@ -209,15 +194,142 @@
     }
 
 ```  
-#### Thread 内他自己实现的Runnable的方法  
+## 看看一下Callable<T> 如果转为Runnable的  FutureTask包装之后一Callable<T>变为Runnable的
+### 看一下FutureTask类 
+```java
+
+public class FutureTask<V> implements RunnableFuture<V>
+/** The underlying callable; nulled out after running */
+private Callable<V> callable; //这个是FutureTask里面的一个一个成员变量
+//下面的就成了
+public interface RunnableFuture<V> extends Runnable, Future<V> {
+    /**
+     * Sets this Future to the result of its computation
+     * unless it has been cancelled.
+     * 下面的方法是Runnable接口那个run方法，这里只是标注和说明
+     */
+    void run();
+}
+```
+### FutureTask类的构造方法  
+- 构造方法一  
 ```java
 /**
- * 就是为什么需要实现这个接口的原因
+ * 如果你传入Callable的我直接把 this.callable = callable;
+ * @param callable
  */
-    @Override
-    public void run() {
-        if (target != null) {
-            target.run();
+    public FutureTask(Callable<V> callable) {
+        if (callable == null)
+            throw new NullPointerException();
+        this.callable = callable;
+        this.state = NEW;       // ensure visibility of callable
+    }
+```
+- 构造方法二 
+```java
+/**
+ * 这里会传入一个 Runnable runnable,和一个 V result
+ * 为什么需要传入  V result  ，因为Runnable是无返回值的，就是如果你的线程执行成功就返回你传入的值，你看到你就会知道线程执行成功了
+ * @param runnable
+ * @param result
+ */
+    public FutureTask(Runnable runnable, V result) {
+        this.callable = Executors.callable(runnable, result);  //这里就是如何把一个Runnable接口的转为call的关键
+        this.state = NEW;       // ensure visibility of callable
+    }
+    
+    /* 看一下 Executors.callable(runnable, result)  方法
+        public static <T> Callable<T> callable(Runnable task, T result) {
+        if (task == null)
+            throw new NullPointerException();
+        return new RunnableAdapter<T>(task, result);  //再看这里
+    }
+    
+      /**
+     * A callable that runs given task and returns given result.这里就是Runnable到Callable的适配器
+     */
+    private static final class RunnableAdapter<T> implements Callable<T> {
+        private final Runnable task;
+        private final T result;
+        RunnableAdapter(Runnable task, T result) {
+            this.task = task;
+            this.result = result;
+        }
+        public T call() {
+            //关键看这个call方法
+            task.run();
+            return result;
+        }
+        public String toString() {
+            return super.toString() + "[Wrapped task = " + task + "]";
+        }
+    }
+     */
+```
+### 先看FutureTask如何实现的Runnable接口的run方法
+- FutureTask  有两个属性  
+```java
+    /** The underlying callable; nulled out after running */ //这里保存FutureTask传入的Runnable或者Callable<T>的实例
+    private Callable<V> callable;
+    /** The result to return or exception to throw from get() */ //这里保存结果
+    private Object outcome; // non-volatile, protected by state reads/writes
+```
+```java
+    //这个就是FutureTask实现的Runnable接口的run方法具体实现
+   public void run() {
+        if (state != NEW ||
+            !RUNNER.compareAndSet(this, null, Thread.currentThread()))
+            return;
+        try {
+            Callable<V> c = callable;   //看这里，如果FutureTask传入的Callable的实例，可以使用Callable的call()方法，如果不是就需要使用适配器把Runnable的run方法弄成call
+            if (c != null && state == NEW) {
+                V result;
+                boolean ran;
+                try {
+                    /**
+                     * 看这里，
+                     */
+                    result = c.call();
+                    ran = true;
+                } catch (Throwable ex) {
+                    result = null;
+                    ran = false;
+                    setException(ex);
+                }
+                if (ran)
+                    set(result);
+            }
+        } finally {
+            // runner must be non-null until state is settled to
+            // prevent concurrent calls to run()
+            runner = null;
+            // state must be re-read after nulling runner to prevent
+            // leaked interrupts
+            int s = state;
+            if (s >= INTERRUPTING)
+                handlePossibleCancellationInterrupt(s);
+        }
+    }
+```
+
+- 下面是Executors类下面的一个静态类，就是他把
+```java
+    /**
+     * A callable that runs given task and returns given result.
+     */
+    private static final class RunnableAdapter<T> implements Callable<T> {
+        private final Runnable task;
+        private final T result;
+        RunnableAdapter(Runnable task, T result) {
+            this.task = task;
+            this.result = result;
+        }
+        public T call() {
+            task.run();
+            return result;
+        }
+        public String toString() {
+            return super.toString() + "[Wrapped task = " + task + "]";
         }
     }
 ```
