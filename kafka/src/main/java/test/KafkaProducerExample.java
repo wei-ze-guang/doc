@@ -97,7 +97,7 @@ public class KafkaProducerExample {
     static String getBitString(){
         StringBuilder sb = new StringBuilder();
         String base = "0123456789";
-        sb.append(base.repeat(10000));
+        sb.append(base);
         return sb.toString();
     }
 }

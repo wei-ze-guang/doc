@@ -5,9 +5,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import java.util.Properties;
 
 public class KafkaSingFactory {
-    public static void main(String[] args) {
-
-    }
 
     static KafkaConsumer<String, String> getConsumer(boolean autoCommit,String groupId) {
         Properties kafkaCommonProperties = getKafkaCommonProperties();
@@ -21,14 +18,14 @@ public class KafkaSingFactory {
     /**
      * 定义一个静态方法
      */
-    static Properties getKafkaCommonProperties() {
+    private static Properties getKafkaCommonProperties() {
         Properties props = new Properties();
         props.put("bootstrap.servers", "localhost:9092");
         /**
          * 这几为手动之后就需要自己的提交了
          */
 //        props.put("enable.auto.commit", false);
-        props.put("auto.commit.interval.ms", "1000");
+        props.put("auto.commit.interval.ms", "100");
         props.put("session.timeout.ms", "30000");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");

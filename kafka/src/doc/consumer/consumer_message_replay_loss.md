@@ -16,4 +16,16 @@ poll -> offset=100 ~ 105
   - 使用 commitSync() / commitAsync() 在消息处理完之后手动提交 offset  
 
 ### 重复消费  
-1. 
+1. 使用commitSync()或者commitAsync()  无参方法手动提交  
+使用无参的提交的话他会默认提交最新拉取到的最新的各个分区的最新的offset+1;
+出现重复消费问题大概率是你拉取到消息之后，消息你拉取完了，但是在提交的时候出错了，这时候服务端收不到你的提交，服务端的offset位移没有改变  
+你下次拉取的时候还是会拉取到旧的offset ,  就会出现重复消费问题  
+- 这里还会出现一个问题  手动异步提交的时候时候可能你还没提交出去，又会拉取到一批消息
+- commitSync()或者commitAsync()  还提供了有参数的情况，就是按照分区或offset两个参数提交，但是异步 commitAsync() 还提供了多了一个回调，提交完成或者异常时候的回调 
+```text
+commitAsync(offset1);
+commitAsync(offset2);
+结果 offset1 比 offset2 后到达 Kafka broker，于是 Kafka 保存了旧的 offset → 数据重复消费。
+
+```  
+### 控制或者关闭消费
