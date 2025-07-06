@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -151,7 +152,23 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * never be used in index calculations because of table bounds.
      */
     static final int hash(Object key) {
+        /**
+         * h = 1011 0000 1111 0000 0000 0000 0000 1111 原始
+         * h >>> 16 = 0000 0000 0000 0000 1011 0000 1111 0000  // 无符号右移动16位
+         * 原始：    1011 0000 1111 0000 0000 0000 0000 1111
+         * 右移后：  ^0000 0000 0000 0000 1011 0000 1111 0000
+         * 结果：    1011 0000 1111 0000 1011 0000 1111 1111 异或运算
+         * 这个结果就叫扰动哈希值，会被用于 i = (n - 1) & hash 计算桶的位置。
+         * | 原始哈希问题                             | 解决方案（^ 高16位）              |
+         * | ---------------------------------- | ------------------------- |
+         * | hashCode() 有些类只用高位或低位              | 高16位移到低位参与计算，提高分布均匀性      |
+         * | HashMap 计算桶位置只看低位 `(n - 1) & hash` | 把高位混到低位中，避免很多 key 落到同一桶   |
+         * | 避免冲突，提高性能                          | 特别是在 key.hashCode() 质量不好时 |
+         */
         int h;
+        String a = "首先对key进行一次hash";
+        System.out.println(a);
+        trace.put((String)key,a );
         return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
     }
 
@@ -221,6 +238,10 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         for (int i = 0; i < table.length; i++) {
             Node<K,V> node = table[i]; // 取出桶的头节点
             System.out.print("桶 " + i + ": ");
+
+            if(node != null){
+                printLog("打印一下桶自己:"+node.toString());
+            }
 
             while (node != null) {
                 System.out.print("[" + node.key + "=" + node.value + "] -> ");
@@ -448,7 +469,19 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      *         (A <tt>null</tt> return can also indicate that the map
      *         previously associated <tt>null</tt> with <tt>key</tt>.)
      */
+    /**
+     * 用来记录每一个mao经历了很忙的
+     */
+    static ConcurrentHashMap <String,String> trace = new ConcurrentHashMap<>();
+    public void printTrace(){
+        for (String s : trace.keySet()){
+            System.out.println(trace.get(s));
+        }
+    }
+
     public V put(K key, V value) {
+        String a = "准备进入putVal方法";
+        trace.put((String) key,a);
         return putVal(hash(key), key, value, false, true);
     }
 
@@ -463,46 +496,73 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * @return previous value, or null if none
      */
     final V putVal(int hash, K key, V value, boolean onlyIfAbsent, boolean evict) {
-        printLog("调用 putVal，key = " + key + "，value = " + value);
+//        printLog("调用 putVal，key = " + key + "，value = " + value);
 
         Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0) {
-            printLog("数组为空，执行扩容操作");
+            String a  =  trace.get(key)+"----->"+"检查到数组为空数组为空，执行扩容操作";
+            printLog(a);
+            trace.put((String) key,a);
             //下面执行扩容操作
             n = (tab = resize()).length;
         }
 
+        /**
+         * 这里其实就是取模 如果 n 是 2，hash % n 等价于 hash & (n - 1)，速度更快。
+         */
         i = (n - 1) & hash;
-        printLog("计算索引位置 i = " + i);
+
+        String b = trace.get(key)+"----->"+"二次hash后的hash的值为"+i +"这次使用取余方法计算hash值，直接得到桶下标";
+        trace.put((String) key,b);
+
+
+        printLog("计算node的hash值，计算索引位置 i = " + i);
 
         if ((p = tab[i]) == null) {
-            printLog("当前位置没有节点，插入新节点");
+            String c = trace.get(key)+"----->"+"当前桶位置没有节点，插入新节点";
+            printLog(c);
+            trace.put((String) key,c);
             tab[i] = newNode(hash, key, value, null);
         } else {
+            String c = trace.get(key)+"----->"+"当前桶已经有数据了节点，准备看一下有没有相同或的值的";
+            trace.put((String) key,c);
+            printLog(c);
             Node<K,V> e; K k;
             if (p.hash == hash &&
                     ((k = p.key) == key || (key != null && key.equals(k)))) {
-                printLog("发现键相同的节点，准备更新对应的值");
+                String d = trace.get(key)+"----->"+"发现键相同的节点，准备更新对应的值";
+                printLog(d);
+                trace.put((String) key,d);
                 e = p;
             } else if (p instanceof TreeNode) {
-                printLog("当前位置是红黑树，调用红黑树插入方法");
+                String f = trace.get(key)+"----->"+"当前位置是红黑树，调用红黑树插入方法";
+                trace.put((String) key,f);
+                printLog(f);
                 e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
             } else {
-                printLog("当前位置是链表，遍历链表查找插入位置");
+                String g = trace.get(key)+"----->"+"当前位置是链表，遍历链表查找插入位置";
+                printLog(g);
+                trace.put((String) key,g);
                 int binCount = 0;
                 for (;;) {
                     if ((e = p.next) == null) {
-                        printLog("到达链表末尾，插入新节点");
+                        String y = trace.get(key)+"----->"+"到达链表末尾，插入新节点";
+                        printLog(y);
+                        trace.put((String) key,y);
                         p.next = newNode(hash, key, value, null);
                         if (binCount >= TREEIFY_THRESHOLD - 1) {
-                            printLog("链表长度超过阈值，转换为红黑树");
+                            String h = "链表长度超过阈值，转换为红黑树";
+                            printLog(h);
+                            trace.put((String) key,h);
                             treeifyBin(tab, hash);
                         }
                         break;
                     }
                     if (e.hash == hash &&
                             ((k = e.key) == key || (key != null && key.equals(k)))) {
-                        printLog("链表中找到相同键的节点，准备更新值");
+                        String j = trace.get(key)+"----->"+"链表中找到相同键的节点，准备更新值";
+                        printLog(j);
+                        trace.put((String) key,j);
                         break;
                     }
                     p = e;
@@ -510,9 +570,13 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                 }
             }
             if (e != null) { // 已存在的键
+                String t = trace.get(key)+"----->"+"存在同样的key";
+                trace.put((String) key,t);
                 V oldValue = e.value;
                 if (!onlyIfAbsent || oldValue == null) {
-                    printLog("更新旧值");
+                    String r = trace.get(key)+"----->"+"更新旧值";
+                    printLog(r);
+                    trace.put((String) key,r);
                     e.value = value;
                 } else {
                     printLog("仅当旧值为null才更新，跳过更新");
@@ -523,11 +587,15 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         }
         ++modCount;
         if (++size > threshold) {
-            printLog("元素数量超过阈值，执行扩容");
+            String s = trace.get(key)+"----->"+"元素数量超过阈值，执行扩容";
+            printLog(s);
+            trace.put((String) key,s);
             resize();
         }
         afterNodeInsertion(evict);
-        printLog("插入操作完成");
+        String k = trace.get(key)+"----->"+"插入操作完成";
+        printLog(k);
+        trace.put((String) key,k);
         return null;
     }
 

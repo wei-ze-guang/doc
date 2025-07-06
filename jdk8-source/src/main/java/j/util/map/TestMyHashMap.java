@@ -11,14 +11,16 @@ public class TestMyHashMap {
 //        for (Object key : map.keySet()) {
 //            System.out.println("key=" + key + ", value=" + map.get(key));
 //        }
-        for (int j = 0; j < 10000; j++) {
-            map.put("key" + j, "value" + j);
+        for (int j = 0; j < 100; j++) {
+            map.put("k" + j, "v");
         }
-        System.out.println("扩容次数"+map.getResizeCount());
 
-        map.printSize();
-        map.printTableSize();
-        map.printLinked();
+//
+//        map.printSize();
+//        map.printTableSize();
+//        map.printLinked();
+        map.printTrace();
+        System.out.println("扩容次数"+map.getResizeCount());
 
 
     }

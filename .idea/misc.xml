@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/spring-security/pom.xml" />
         <option value="$PROJECT_DIR$/image-help/pom.xml" />
         <option value="$PROJECT_DIR$/kafka/pom.xml" />
+        <option value="$PROJECT_DIR$/demo-redis/pom.xml" />
       </list>
     </option>
   </component>
