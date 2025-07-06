@@ -20,6 +20,8 @@
         <module>module-test</module>
         <module>SUANFA</module>
         <module>batch-study</module>
+        <module>jvm</module>
+        <module>jdk8-source</module>
     </modules>
 
     <properties>
