@@ -21,6 +21,7 @@ public class RBloomFilterTest {
 
 // 添加元素
         bloomFilter.add("hello");
+        bloomFilter.add("world");
 
 // 判断元素是否存在
         boolean exists = bloomFilter.contains("hello");  // true
