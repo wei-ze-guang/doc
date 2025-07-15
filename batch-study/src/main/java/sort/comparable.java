@@ -27,6 +27,7 @@ public class comparable {
                 return o1.age - o2.age;
             }
         });
+
         System.out.println(list1);
         System.out.println("使用临时的接口");
 

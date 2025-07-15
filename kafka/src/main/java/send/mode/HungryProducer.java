@@ -8,7 +8,8 @@ import java.util.Properties;
  * 饿汉式形式，不是在静态代码里面
  */
 public class HungryProducer {
-    private static HungryProducer instance = new HungryProducer();
+
+    private static final HungryProducer instance = new HungryProducer();
 
     KafkaProducer<String, String> kafkaProducer;
 

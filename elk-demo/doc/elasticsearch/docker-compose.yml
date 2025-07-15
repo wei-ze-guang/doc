@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  elasticsearch:
+    image: elasticsearch:7.12.1
+    container_name: es
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9201:9200"   #本机9200  端口被占用了，改为9201 这样子就可以访问了 http://localhost:9201/
+      - "9300:9300"   #
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+      - es-plugins:/usr/share/elasticsearch/plugins
+    networks:
+      - es-net
+    privileged: true
+
+  kibana:
+    image: kibana:7.12.1
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es:9200 # 容器可以直接用服务名（es）当作主机名来访问别的容器，
+    ports:
+      - "5601:5601"   #  http://localhost:5601 这样子访问
+    networks:
+      - es-net
+
+volumes:
+  es-data:
+  es-plugins:
+
+networks:
+  es-net:
+    driver: bridge

@@ -22,6 +22,7 @@
         <module>batch-study</module>
         <module>jvm</module>
         <module>jdk8-source</module>
+        <module>elk-demo</module>
     </modules>
 
     <properties>
