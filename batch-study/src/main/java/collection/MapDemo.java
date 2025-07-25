@@ -86,6 +86,13 @@ public class MapDemo implements Comparable<MapDemo> {
          * 下面是有序的
          */
         Map<String,String> linkHashMap = new LinkedHashMap<>();
+
+        Set<Map.Entry<String, String>> entries = linkHashMap.entrySet();
+
+        Set<String> set = linkHashMap.keySet();
+        Collection<String> values = linkHashMap.values();
+
+
         for(int i = 0 ; i <100 ; i++){
             linkHashMap.put("key" + i, "value" + i);
         }

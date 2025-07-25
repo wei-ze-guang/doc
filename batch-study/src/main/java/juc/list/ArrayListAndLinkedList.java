@@ -37,22 +37,28 @@ public class ArrayListAndLinkedList {
 
         for (int i = 0; i < threads; i++) {
             int finalI = i;
-            instance.execute(() ->{
-                    final int ii = finalI;
-                    list.add(String.valueOf(ii));
-                });
+            instance.execute(() -> {
+                final int ii = finalI;
+                list.add(String.valueOf(ii));
+            });
 
-            instance.execute(() ->{
+            instance.execute(() -> {
                 list.forEach(System.out::println);
             });
+
+
+        }
+        try {
+            Thread.sleep(5000);
+            instance.shutdown();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
 
-        instance.shutdown();
         try {
-            instance.awaitTermination(1000L, TimeUnit.SECONDS);
+            instance.awaitTermination(5L, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
     }
 }
