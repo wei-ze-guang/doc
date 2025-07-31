@@ -19,6 +19,7 @@ class Minio1kKafkaConsumer implements KafkaConsumerInterface {
          * 只能通过接口名调用
          */
         Properties properties = KafkaConsumerInterface.getKafkaCommonProperties();
+
         properties.put("group.id", groupId);
         /**
          * 这个最重要

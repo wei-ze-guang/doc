@@ -25,6 +25,7 @@ class Minio1BytesKafkaConsumer implements KafkaConsumerInterface {
          * 这个最重要
          */
         properties.put("fetch.min.bytes", 1);
+
         return new KafkaConsumer<>(properties);
     }
 }

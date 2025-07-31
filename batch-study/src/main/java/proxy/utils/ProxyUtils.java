@@ -7,6 +7,7 @@ import java.lang.reflect.Proxy;
 public class ProxyUtils{
 
     public  static <T>  T getProxyInstance(T target){
+
         ClassLoader classLoader = target.getClass().getClassLoader();
         Class<?>[] interfaces = target.getClass().getInterfaces();
 

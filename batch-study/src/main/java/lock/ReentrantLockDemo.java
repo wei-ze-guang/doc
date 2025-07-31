@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -20,6 +21,19 @@ public class ReentrantLockDemo {
         try {
             Instant now = Instant.now();
             System.out.println(Thread.currentThread().getName());
+
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    @Test
+    public void testTryLock(){
+        lock.tryLock();
+        try {
+            Instant now = Instant.now();
+            System.out.println(Thread.currentThread().getName());
+            test2();
 
         }finally {
             lock.unlock();
@@ -63,13 +77,16 @@ public class ReentrantLockDemo {
             lock.lockInterruptibly();
         } catch (InterruptedException e) {
             System.out.println("线程被中断");
+        }finally {
+            lock.unlock();
         }
 
     }
 
     private static void testInterrupted1(){
+        lock.lock();
         try {
-            lock.lock();
+
         } finally {
             lock.unlock();
         }
