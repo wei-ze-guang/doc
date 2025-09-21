@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.LongBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -42,6 +43,7 @@ public class BufferReadModel {
         }
 
         String s = new String(str);
+
         System.out.println(s);
 
     }
@@ -100,6 +102,18 @@ public class BufferReadModel {
     public void test4() {
         int capacity = 128;
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(capacity);  //对外创建方式只能是byteBuffer
+
+        LongBuffer allocate = LongBuffer.allocate(10000);
+        for (int i = 0; i < capacity; i++) {
+            int i1 = rand.nextInt(capacity);
+            allocate.put(i);
+        }
+        allocate.flip();
+        while (allocate.hasRemaining()) {
+            long l = allocate.get();
+            System.out.println(l);
+        }
+
     }
     /**
      * | 类型            | 是否支持直接缓冲区   | 如何获取                                    |

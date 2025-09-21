@@ -31,10 +31,11 @@ public class FileChannelDemo {
             inputStream = new FileInputStream(path1.toFile());
             outputStream = new FileOutputStream(outPath);
 
-            FileChannel fileInputChannel = inputStream.getChannel();  //获取channel 单向的
+            FileChannel fileInputChannel = inputStream.getChannel();
+            //获取channel 单向的
             FileChannel fileOutPutChannel = outputStream.getChannel();  //获取channel  单向的
 
-            //映射到缓冲区
+            //映射到缓冲区,MappedByteBuffer,ByteBuffer
             MappedByteBuffer map = fileInputChannel.map(FileChannel.MapMode.READ_ONLY, 0, path1.toFile().length() );//
 
             //通过channel 把缓冲区的数据写入文件

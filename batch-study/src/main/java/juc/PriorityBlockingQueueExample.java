@@ -40,6 +40,7 @@ public class PriorityBlockingQueueExample {
 
 
         long startTime = System.currentTimeMillis();
+
         for (int i = 0; i < threads; i++) {
             new producerThread().start();
             consumerThread consumerThread = new consumerThread();

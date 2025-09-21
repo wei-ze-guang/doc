@@ -18,7 +18,6 @@ public class FileInfo {
     public void test() {
         File file = new File("out.txt");
         System.out.println(file.getAbsolutePath());
-
         printInfo(file);
     }
 

@@ -134,20 +134,26 @@ class MyTask implements Delayed {
     }
 
     /**
-     * 比较两个 Delayed 对象的先后顺序
+     * 比较两个 Delayed 对象的先后顺序，延迟队列不使用这个排序
      * @param other 另一个待比较的 Delayed 对象
      * @return -1 表示当前任务先执行，1 表示后执行
      */
+//    @Override
+//    public int compareTo(Delayed other) {
+//        // 比较剩余延迟时间，谁短谁优先
+//        if (this.getDelay(TimeUnit.NANOSECONDS) < other.getDelay(TimeUnit.NANOSECONDS)) {
+//            return -1;
+//        } else if (this.getDelay(TimeUnit.NANOSECONDS) > other.getDelay(TimeUnit.NANOSECONDS)) {
+//            return 1;
+//        } else {
+//            return 0;
+//        }
+//    }
+
     @Override
-    public int compareTo(Delayed other) {
-        // 比较剩余延迟时间，谁短谁优先
-        if (this.getDelay(TimeUnit.NANOSECONDS) < other.getDelay(TimeUnit.NANOSECONDS)) {
-            return -1;
-        } else if (this.getDelay(TimeUnit.NANOSECONDS) > other.getDelay(TimeUnit.NANOSECONDS)) {
-            return 1;
-        } else {
-            return 0;
-        }
+    public int compareTo(Delayed o) {
+        return Long.compare(this.getDelay(TimeUnit.NANOSECONDS),
+                o.getDelay(TimeUnit.NANOSECONDS));
     }
 
     @Override
